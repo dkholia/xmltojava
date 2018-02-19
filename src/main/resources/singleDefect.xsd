@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="defect">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="record-id" type="xs:unsignedByte" />
+        <xs:element name="defect-number" type="xs:unsignedByte" />
+        <xs:element name="summary" type="xs:string" />
+        <xs:element name="entered-by">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="last-name" type="xs:string" />
+              <xs:element name="first-name" type="xs:string" />
+              <xs:element name="middle-name" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="date-entered" type="xs:string" />
+        <xs:element name="type" type="xs:string" />
+        <xs:element name="product" type="xs:string" />
+        <xs:element name="priority" type="xs:string" />
+        <xs:element name="severity" type="xs:string" />
+        <xs:element name="workaround">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string">
+                <xs:attribute name="has-formatting" type="xs:boolean" use="required" />
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="custom-field-value">
+          <xs:complexType>
+            <xs:attribute name="field-name" type="xs:string" use="required" />
+            <xs:attribute name="field-value" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="reported-by-record">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="found-by">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="last-name" type="xs:string" />
+                    <xs:element name="first-name" type="xs:string" />
+                    <xs:element name="middle-name" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="date-found" type="xs:string" />
+              <xs:element name="version-found" type="xs:decimal" />
+              <xs:element name="description">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="has-formatting" type="xs:boolean" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="steps-to-reproduce">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="has-formatting" type="xs:boolean" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="computer-config">
+                <xs:complexType>
+                  <xs:attribute name="type" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="other-hardware-and-software">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="has-formatting" type="xs:boolean" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element maxOccurs="unbounded" name="defect-event">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="event-name" type="xs:string" />
+              <xs:element name="event-date" type="xs:string" />
+              <xs:element name="event-author">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="last-name" type="xs:string" />
+                    <xs:element name="first-name" type="xs:string" />
+                    <xs:element name="middle-name" type="xs:string" />
+                  </xs:sequence>
+                  <xs:attribute name="system-user" type="xs:boolean" use="optional" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="notes" type="xs:string" />
+              <xs:element minOccurs="0" name="custom-field-value">
+                <xs:complexType>
+                  <xs:attribute name="field-name" type="xs:string" use="required" />
+                  <xs:attribute name="field-value" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="event-assigned-to">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="assigned-to-user">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="last-name" type="xs:string" />
+                          <xs:element name="first-name" type="xs:string" />
+                          <xs:element name="middle-name" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="defect-status" type="xs:string" />
+        <xs:element name="created-by">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="last-name" type="xs:string" />
+              <xs:element name="first-name" type="xs:string" />
+              <xs:element name="middle-name" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="date-created" type="xs:string" />
+        <xs:element name="creation-method" type="xs:string" />
+        <xs:element name="last-modified-by">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="last-name" type="xs:string" />
+              <xs:element name="first-name" type="xs:string" />
+              <xs:element name="middle-name" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="date-last-modified" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
