@@ -73,6 +73,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "customFieldValue",
     "reportedByRecord",
     "defectEvent",
+    "historicalEvent",
     "defectStatus",
     "createdBy",
     "dateCreated",
@@ -115,6 +116,8 @@ public class Defect {
     public ReportedByRecord reportedByRecord;
     @XmlElement(name = "defect-event", required = true)
     public List<DefectEvent> defectEvent;
+    @XmlElement(name = "historical-event", required = true)
+    public List<HistoricalEvent> historicalEvent;
     @XmlElement(name = "defect-status", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NCName")
@@ -591,4 +594,11 @@ public class Defect {
         this.dateLastModified = value;
     }
 
+	public List<HistoricalEvent> getHistoricalEvent() {
+		if(historicalEvent  == null)
+			historicalEvent = new ArrayList<HistoricalEvent>();
+		return historicalEvent;
+	}
+    
+    
 }

@@ -11,6 +11,7 @@ package com.expr.model;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
@@ -35,10 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "")
+@XmlType(name = "", propOrder = {
+	    "multiLineText",
+	    "multiSelect"
+	})
 @XmlRootElement(name = "custom-field-value")
 public class CustomFieldValue {
-
+    @XmlElement(name = "multi-line-text")
+    public MultiLineText multiLineText;
+    @XmlElement(name = "multi-select")
+    public MultiSelect multiSelect;
     @XmlAttribute(name = "field-name", required = true)
     @XmlSchemaType(name = "anySimpleType")
     public String fieldName;
@@ -47,6 +54,38 @@ public class CustomFieldValue {
     public String fieldValue;
 
     /**
+	 * @return the multiLineText
+	 */
+	public MultiLineText getMultiLineText() {
+		if(multiLineText==null)
+			multiLineText = new MultiLineText();
+		return multiLineText;
+	}
+
+	/**
+	 * @param multiLineText the multiLineText to set
+	 */
+	public void setMultiLineText(MultiLineText multiLineText) {
+		this.multiLineText = multiLineText;
+	}
+
+	/**
+	 * @return the multiSelect
+	 */
+	public MultiSelect getMultiSelect() {
+		if(multiSelect==null)
+			multiSelect = new MultiSelect();
+		return multiSelect;
+	}
+
+	/**
+	 * @param multiSelect the multiSelect to set
+	 */
+	public void setMultiSelect(MultiSelect multiSelect) {
+		this.multiSelect = multiSelect;
+	}
+
+	/**
      * Gets the value of the fieldName property.
      * 
      * @return

@@ -28,11 +28,12 @@ import com.expr.model.CustomFieldValue;
 import com.expr.model.Defect;
 import com.expr.model.DefectEvent;
 import com.expr.model.Defects;
+import com.expr.model.HistoricalEvent;
 import com.expr.model.ObjectFactory;
 
 public class XmlReader {
 
-	private static final String FILENAME = "defects.xlsx";
+	private static final String FILENAME = "defects_ned.xlsx";
 
 	/**
 	 * @param args
@@ -45,7 +46,7 @@ public class XmlReader {
 
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-		Defects defects = (Defects)unmarshaller.unmarshal(ClassLoader.getSystemResourceAsStream("multipleDefects.xml"));
+		Defects defects = (Defects)unmarshaller.unmarshal(ClassLoader.getSystemResourceAsStream("ned.xml"));
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet sheet = workbook.createSheet("Defects");
@@ -82,8 +83,9 @@ public class XmlReader {
 			}
 		}
 
-		Map<String, List<CustomFieldValue>> customFieldMap = new HashMap<String, List<CustomFieldValue>>();
+		Map<Key, List<CustomFieldValue>> customFieldMap = new HashMap<Key, List<CustomFieldValue>>();
 		Map<Key, List<DefectEvent>> defectEventMap = new HashMap<Key, List<DefectEvent>>();
+		Map<Key, List<HistoricalEvent>> historicalEventMap = new HashMap<Key, List<HistoricalEvent>>();
 		for( Defect defect:  defects.getDefect()) {
 			row = sheet.createRow(record++);
 
@@ -103,19 +105,36 @@ public class XmlReader {
 					Class<?> clazz = currField.getType();
 					if(currField.getName()=="customFieldValue"){
 						myFields =  clazz.getFields();
-						customFieldMap.put(defect.getSummary(), defect.getCustomFieldValue());
+						Key k = new Key(defect.getDefectNumber(), defect.getSummary());
+						List<CustomFieldValue> ll = new ArrayList<CustomFieldValue>();
+						ll.addAll(defect.getCustomFieldValue());
+						customFieldMap.put(k, ll);
 					}else{
 						if( clazz.getName() == "java.util.List"){
 							List<?> list = (List<?>) currField.get(defect);
 							if(currField.getName()=="defectEvent"){
 								List<DefectEvent> defectEventList = new ArrayList<DefectEvent>();
 								if(null == defectEventMap.get(defect.getDefectNumber())){
-									defectEventList.addAll((Collection<? extends DefectEvent>) currField.get(defect));
+									try {
+										defectEventList.addAll((Collection<? extends DefectEvent>) currField.get(defect));
+									} catch (Exception e) {}
 								}else{
 									defectEventList = defectEventMap.get(defect.getDefectNumber());
 									defectEventList.add((DefectEvent) currField.get(defect));
 								}
 								defectEventMap.put(new Key( defect.getDefectNumber() , defect.getSummary()), defectEventList);
+								continue;
+							}else if(currField.getName()=="historicalEvent"){
+								List<HistoricalEvent> historicalEventList = new ArrayList<HistoricalEvent>();
+								if(null == historicalEventMap.get(defect.getDefectNumber())){
+									try {
+										historicalEventList.addAll((Collection<? extends HistoricalEvent>) currField.get(defect));
+									} catch (Exception e) {}
+								}else{
+									historicalEventList = historicalEventMap.get(defect.getDefectNumber());
+									historicalEventList.add((HistoricalEvent) currField.get(defect));
+								}
+								historicalEventMap.put(new Key( defect.getDefectNumber() , defect.getSummary()), historicalEventList);
 								continue;
 							}
 							for ( int i=0 ;i<list.size() ;i++){  
@@ -161,7 +180,7 @@ public class XmlReader {
 		/** create separate worksheet for defectEvent **/
 		XSSFSheet defectEvents = workbook.createSheet("Defect Events");
 		TreeMap<Key, List<DefectEvent>> sortedMap = new TreeMap<Key, List<DefectEvent>>(defectEventMap);
-		
+
 		Key firstRecord =  (Key) sortedMap.keySet().toArray()[0];
 		fields =  sortedMap.get(firstRecord).get(0).getClass().getFields();
 		record = 0;
@@ -182,12 +201,12 @@ public class XmlReader {
 			row = defectEvents.createRow(record++);
 			for(DefectEvent defectEvent : events){
 				int colNum = -1;
-				
+
 				cell = row.createCell(++colNum);
 				cell.setCellValue(summary.getDefectNumber().toString());
 				cell = row.createCell(++colNum);
 				cell.setCellValue(summary.getSummary());
-				
+
 				for( Field currField : fields){
 					if(!currField.getName().equals("notes"))
 						continue;
@@ -209,31 +228,105 @@ public class XmlReader {
 			}
 		}
 
+		if(!historicalEventMap.isEmpty()){
+			/** create separate worksheet for historicalEvents **/
+			XSSFSheet historicalEvents = workbook.createSheet("Historical Events");
+			TreeMap<Key, List<HistoricalEvent>> sortedMap1 = new TreeMap<Key, List<HistoricalEvent>>(historicalEventMap);
+
+			firstRecord =  (Key) sortedMap.keySet().toArray()[0];
+			
+			fields =  HistoricalEvent.class.getFields();
+			record = 0;
+			columnNum = 0;
+			row = historicalEvents.createRow(record++);
+			cell = row.createCell(columnNum++);
+			cell.setCellValue("defectNumber");
+			cell = row.createCell(columnNum++);
+			cell.setCellValue("summary");
+			for( Field currField : fields){
+				if(!currField.getName().equals("information"))
+					continue;
+				cell = row.createCell(columnNum++);
+				cell.setCellValue(currField.getName());
+			}
+			for( Key summary :  sortedMap1.keySet()){
+				List<HistoricalEvent> events = sortedMap1.get(summary);
+				if(events.isEmpty())
+					continue;
+				row = historicalEvents.createRow(record++);
+				for(HistoricalEvent historicalEvent : events){
+					int colNum = -1;
+
+					cell = row.createCell(++colNum);
+					cell.setCellValue(summary.getDefectNumber().toString());
+					cell = row.createCell(++colNum);
+					cell.setCellValue(summary.getSummary());
+
+					for( Field currField : fields){
+						if(!currField.getName().equals("information"))
+							continue;
+						int next = ++colNum;
+						if(null!=row.getCell(next)){
+							cell = row.getCell(next);
+						}else{
+							cell = row.createCell(next);
+						}
+						try {
+							Object value = currField.get(historicalEvent);
+							String prevVal = cell.getStringCellValue();
+							String currVal = (null!=value?value.toString():"") + " updated by " 
+									+ historicalEvent.getLastName() +","+historicalEvent.getFirstName() + " on " + historicalEvent.getDate() +  "\n";
+							cell.setCellValue(prevVal + currVal);
+						} catch (Exception e) {
+							cell.setCellValue("");
+						}
+					}
+				}
+			}
+		}
 		/** create separate worksheet for Custom Fields **/
 		XSSFSheet customFields = workbook.createSheet("Custom Fields");
 		record = 0;
 		columnNum = 0;
 		row = customFields.createRow(record++);
 		cell = row.createCell(columnNum++);
+		cell.setCellValue("defectNumber");
+		cell = row.createCell(columnNum++);
 		cell.setCellValue("summary");
 		cell = row.createCell(columnNum++);
 		cell.setCellValue("customFieldName");
 		cell = row.createCell(columnNum++);
 		cell.setCellValue("customFieldValue");
-		for( String summary :  customFieldMap.keySet()){
-			List<CustomFieldValue> customFieldValueList = customFieldMap.get(summary);
-			
+		cell = row.createCell(columnNum++);
+		cell.setCellValue("multiLineText");
+		cell = row.createCell(columnNum++);
+		cell.setCellValue("multiSelectValue");
+		TreeMap<Key, List<CustomFieldValue>> sortedMap2 = new TreeMap<Key, List<CustomFieldValue>>(customFieldMap);
+
+		for( Key summary :  sortedMap2.keySet()){
+			List<CustomFieldValue> customFieldValueList = sortedMap2.get(summary);
+
 			for(CustomFieldValue fieldValue : customFieldValueList){
 				columnNum =0;
 				row = customFields.createRow(record++);
+
 				cell = row.createCell(columnNum++);
-				cell.setCellValue(summary.toString());
+				cell.setCellValue(summary.getDefectNumber().toString());
+
+				cell = row.createCell(columnNum++);
+				cell.setCellValue(summary.getSummary());
 
 				cell = row.createCell(columnNum++);
 				cell.setCellValue(fieldValue.getFieldName());
 
 				cell = row.createCell(columnNum++);
 				cell.setCellValue(fieldValue.getFieldValue());
+
+				cell = row.createCell(columnNum++);
+				cell.setCellValue(fieldValue.getMultiLineText().getContent());
+
+				cell = row.createCell(columnNum++);
+				cell.setCellValue(fieldValue.getMultiSelect().getMultiSelectValue());
 			}
 
 		}
@@ -254,10 +347,10 @@ public class XmlReader {
 }
 
 class Key implements Comparable<Key> {
-	
+
 	private BigInteger defectNumber;
 	private String summary;
-	
+
 	public Key(BigInteger defectNumber, String summary) {
 		super();
 		this.defectNumber = defectNumber;
