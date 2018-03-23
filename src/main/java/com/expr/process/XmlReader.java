@@ -294,41 +294,67 @@ public class XmlReader {
 		cell = row.createCell(columnNum++);
 		cell.setCellValue("summary");
 		cell = row.createCell(columnNum++);
-		cell.setCellValue("customFieldName");
+		cell.setCellValue("Artifact Reason");
 		cell = row.createCell(columnNum++);
-		cell.setCellValue("customFieldValue");
+		cell.setCellValue("Targeted Release Version");
+		cell = row.createCell(columnNum++);
+		cell.setCellValue("Request Date");
+		cell = row.createCell(columnNum++);
+		cell.setCellValue("Requester/Client");
+		cell = row.createCell(columnNum++);
+		cell.setCellValue("Requester Email");
+		cell = row.createCell(columnNum++);
+		cell.setCellValue("Requester Phone Number");
 		cell = row.createCell(columnNum++);
 		cell.setCellValue("multiLineText");
 		cell = row.createCell(columnNum++);
 		cell.setCellValue("multiSelectValue");
+		
+
 		TreeMap<Key, List<CustomFieldValue>> sortedMap2 = new TreeMap<Key, List<CustomFieldValue>>(customFieldMap);
 
 		for( Key summary :  sortedMap2.keySet()){
 			List<CustomFieldValue> customFieldValueList = sortedMap2.get(summary);
-
+			
+			Map<String, String> customValueMap = new HashMap<String, String>();
 			for(CustomFieldValue fieldValue : customFieldValueList){
-				columnNum =0;
-				row = customFields.createRow(record++);
-
-				cell = row.createCell(columnNum++);
-				cell.setCellValue(summary.getDefectNumber().toString());
-
-				cell = row.createCell(columnNum++);
-				cell.setCellValue(summary.getSummary());
-
-				cell = row.createCell(columnNum++);
-				cell.setCellValue(fieldValue.getFieldName());
-
-				cell = row.createCell(columnNum++);
-				cell.setCellValue(fieldValue.getFieldValue());
-
-				cell = row.createCell(columnNum++);
-				cell.setCellValue(fieldValue.getMultiLineText().getContent());
-
-				cell = row.createCell(columnNum++);
-				cell.setCellValue(fieldValue.getMultiSelect().getMultiSelectValue());
+				customValueMap.put(fieldValue.getFieldName(), fieldValue.getFieldValue());
+				customValueMap.put("multiLineText", fieldValue.getMultiLineText().getContent());
+				customValueMap.put("multiSelectValue", fieldValue.getMultiSelect().getMultiSelectValue());
 			}
+			
+			columnNum =0;
+			row = customFields.createRow(record++);
+		
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(summary.getDefectNumber().toString());
 
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(summary.getSummary());
+
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("Artifact Reason"));
+
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("Targeted Release Version"));
+
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("Request Date"));
+
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("Requester/Client"));
+			
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("Requester Email"));
+			
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("Requester Phone Number"));
+			
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("multiLineText"));
+			
+			cell = row.createCell(columnNum++);
+			cell.setCellValue(customValueMap.get("multiSelectValue"));
 		}
 
 		/** Finally write to the excel sheet**/
